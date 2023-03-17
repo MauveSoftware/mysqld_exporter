@@ -29,18 +29,18 @@ import (
 )
 
 const infoSchemaProcesslistQuery = `
-		  SELECT
-		    user,
-		    SUBSTRING_INDEX(host, ':', 1) AS host,
-		    COALESCE(command, '') AS command,
-		    COALESCE(state, '') AS state,
-		    COUNT(*) AS processes,
-		    SUM(time) AS seconds
-		  FROM information_schema.processlist
-		  WHERE ID != connection_id()
-		    AND TIME >= %d
-		  GROUP BY user, SUBSTRING_INDEX(host, ':', 1), command, state
-	`
+	SELECT
+	  PROCESSLIST_USER AS user,
+	  SUBSTRING_INDEX(PROCESSLIST_HOST, ':', 1) AS host,
+	  COALESCE(PROCESSLIST_COMMAND, '') AS command,
+      COALESCE(PROCESSLIST_STATE, '') AS state,
+	  COUNT(*) AS processes,
+	  SUM(PROCESSLIST_TIME) AS seconds
+	FROM performance_schema.threads
+	WHERE PROCESSLIST_ID != connection_id()
+	  AND TIME >= %d
+	GROUP BY user, SUBSTRING_INDEX(host, ':', 1), command, state
+`
 
 // Tunable flags.
 var (

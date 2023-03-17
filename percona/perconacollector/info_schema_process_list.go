@@ -28,13 +28,17 @@ import (
 )
 
 const infoSchemaProcesslistQuery = `
-		SELECT COALESCE(command,''),COALESCE(state,''),count(*),sum(time)
-		  FROM information_schema.processlist
-		  WHERE ID != connection_id()
-		    AND TIME >= %d
-		  GROUP BY command,state
-		  ORDER BY null
-		`
+	SELECT
+	  COALESCE(PROCESSLIST_COMMAND, ''),
+	  COALESCE(PROCESSLIST_STATE, ''),
+	  COUNT(*),
+	  SUM(PROCESSLIST_TIME)
+	FROM performance_schema.threads
+	WHERE PROCESSLIST_ID != connection_id()
+	  AND TIME >= %d
+	GROUP BY command, state
+	ORDER BY NULL
+`
 
 // Tunable flags.
 var (
